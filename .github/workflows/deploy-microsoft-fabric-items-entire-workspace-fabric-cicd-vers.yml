@@ -1,0 +1,40 @@
+name: Deploy all supported workspace items via specific version of fabric-cicd
+
+# Note this repository requires the below GitHub secrets configured:
+# AZURE_CLIENT_ID - Your service principal client ID.
+# AZURE_CLIENT_SECRET - Your service principal secret. Note this is the secret value.
+# AZURE_TENANT_ID - Your Microsoft Entra tenant ID.
+
+# In addition, the below repository variables need to be configured:
+# WorkspaceId - GUID value of the test workspace.
+# FabriccicdVersion - Version of fabric-cicd (blank value deploys latest version).
+
+#Sets the trigger to manual
+on:
+  workflow_dispatch:
+
+# Specify ResourceUrl and items in scope
+env:
+  resourceUrl: https://api.fabric.microsoft.com
+  
+
+jobs:
+
+  # Job to deploy to Test via fabric-cicd
+  'Deploy_to_Test':
+    # I use a GitHub-Hosted runner here, you can opt to use a self-hosted one instead
+    runs-on: windows-latest
+    # Also tested with ubuntu runner
+    # runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy Fabric items
+      uses: EnchantedData/deploy-microsoft-fabric-items@main
+      with:
+        azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+        azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        workspace-id: ${{ vars.WorkspaceId }}
+        environment-name: 'Test'
+        fabric-cicd-version: ${{ vars.FabriccicdVersion }}
+        repository-directory: './workspace'
